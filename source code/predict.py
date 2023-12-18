@@ -411,9 +411,9 @@ def Adversarial_Validation(df, ratio=0.2):  # lgbm version
 
 if __name__ == "__main__":
     df = clean()
-    lr(df)
-    Elastic(df)
-    KNN(df)
-    SVM(df)
+    # lr(df)
+    # Elastic(df)
+    # KNN(df)
+    # SVM(df)
     lgbm(clean())  # mse:2.81
     # Adversarial_Validation(df)

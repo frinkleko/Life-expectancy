@@ -24,6 +24,7 @@ def kde(df):
 
 
 def corr(df):
+
     # 计算所有特征之间的皮尔森相关系数
     correlation_matrix = df.corr()
 
@@ -85,24 +86,39 @@ def world_map(df):
     map.render('world_map.html')
 
 
-def feature_visualization(model, X_train, X_test, tree=False, kernel=False, linear=True):
-    # 模型解释可视化
-    if tree:
-        explainer = shap.TreeExplainer(model)
-    elif kernel:
-        explainer = shap.KernelExplainer(model.predict, X_train)
-    elif linear:
-        explainer = shap.Explainer(model.predict, X_train)
-    else:
-        return
+def feature_visualization(model, X_test):
+    explainer = shap.TreeExplainer(model)
 
-    # ...... need to be done
+    shap_values = explainer(X_test)
+
+    shap.plots.waterfall(shap_values[0])
+
+    shap.plots.force(shap_values[0])
+
+    # 获取期望值和shap值数组
+    expected_value = explainer.expected_value
+    shap_array = explainer.shap_values(X_test)
+
+    # 获取前十20个对象的决策图
+    shap.decision_plot(expected_value, shap_array[0:20], feature_names=list(X_test.columns))
+
+    shap.plots.bar(shap_values)
+
+    # Beeswarm plot
+    shap.plots.beeswarm(shap_values)
+
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 8))
+
+    # SHAP scatter plots
+    # 结合具体feature
+    # shap.plots.scatter(shap_values[:, "feature1"], ax=ax[0], show=False)
+    # shap.plots.scatter(shap_values[:, "feature2"], ax=ax[1])
 
 
 if __name__ == "__main__":
     df = clean()
-    # model, X_train, X_test = lr(df)
-    # feature_visualization(model, X_train, X_test)
-    kde(df)
-    corr(df)
-    world_map(df)
+    model, _, X_test = lgbm(df)
+    feature_visualization(model, X_test)
+    # kde(df)
+    # corr(df)
+    # world_map(df)
