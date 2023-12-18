@@ -1,10 +1,10 @@
 import numpy as np
 from preprocess import clean
 import matplotlib.pyplot as plt
-from lightgbm import LGBMRegressor
+from lightgbm import LGBMRegressor, LGBMClassifier
 from lightgbm import plot_importance
 from sklearn.svm import NuSVR
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, accuracy_score, f1_score
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler, MinMaxScaler
 from sklearn.linear_model import LinearRegression, ElasticNet
 from sklearn.neighbors import KNeighborsRegressor
@@ -365,6 +365,7 @@ def Adversarial_Validation(df, ratio=0.2):  # lgbm version
 
     # 创建包含剩余数据的新DataFrame
     X = df.drop('Life expectancy', axis=1)
+    X = X.drop('New_Column', axis=1)
 
     X['Country'] = LabelEncoder().fit_transform(X['Country'])
     X['Status'] = LabelEncoder().fit_transform(X['Status'])
@@ -376,12 +377,14 @@ def Adversarial_Validation(df, ratio=0.2):  # lgbm version
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio, random_state=42)
 
-    model = LGBMRegressor(
+    model = LGBMClassifier(
         num_leaves=31,
         max_depth=6,
-        learning_rate=0.01,
-        n_estimators=10000,  # 使用多少个弱分类器
-        objective='regression',
+        learning_rate=0.1,
+        metric='binary_logloss',
+        n_estimators=1000,  # 使用多少个弱分类器
+        objective='binary',
+        num_class=1,
         boosting_type='gbdt',
         min_child_weight=2,
         min_child_samples=100,
@@ -392,17 +395,21 @@ def Adversarial_Validation(df, ratio=0.2):  # lgbm version
         bagging_fraction=0.9,
         feature_fraction=0.6,
         bagging_freq=5,
-        seed=111  # 随机数种子
+        # seed=1024  # 随机数种子
     )
 
-    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=100, early_stopping_rounds=200)
+    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=100, early_stopping_rounds=50)
 
     # 对测试集进行预测
     y_pred = model.predict(X_test)
 
     # 计算准确率
-    mse = mean_squared_error(y_test, y_pred)
-    print('mean squared error:', mse)
+    accuracy = accuracy_score(y_test, y_pred)
+    print('accuracy:%8.f%%' % (accuracy * 100))
+
+    # f1分数
+    f1 = f1_score(y_test, y_pred, average='macro')
+    print('f1_score:', f1)
 
     # 显示重要特征
     plot_importance(model)
@@ -415,5 +422,5 @@ if __name__ == "__main__":
     # Elastic(df)
     # KNN(df)
     # SVM(df)
-    lgbm(clean())  # mse:2.81
-    # Adversarial_Validation(df)
+    # lgbm(clean())  # mse:2.81
+    Adversarial_Validation(df)
