@@ -101,8 +101,8 @@ def feature_visualization(model, X_train, X_test, tree=False, kernel=False, line
 
 if __name__ == "__main__":
     df = clean()
-    model, X_train, X_test = lr(df)
-    feature_visualization(model, X_train, X_test)
-    # kde(df)
-    # corr(df)
-    # world_map(df)
+    # model, X_train, X_test = lr(df)
+    # feature_visualization(model, X_train, X_test)
+    kde(df)
+    corr(df)
+    world_map(df)

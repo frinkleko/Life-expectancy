@@ -1,8 +1,10 @@
 import pandas as pd
+import numpy as np
 from preprocess import clean
 from lightgbm import LGBMRegressor
 from predict import lgbm
 from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import VarianceThreshold, SelectFromModel, RFECV
 
 
@@ -116,10 +118,6 @@ def importance(df):
     selected_feature_names = feature_names[selected_feature_indices].tolist()
 
     return selected_feature_names
-
-
-def Adversarial_Validation(df):
-    pass
 
 
 if __name__ == "__main__":
