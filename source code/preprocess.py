@@ -2,7 +2,10 @@ import pandas as pd
 
 
 def clean(path='Life Expectancy Data.csv'):
+
     df = pd.read_csv(path)
+
+    df.info()
 
     # 统计缺失值信息
     missing_info = df.isnull().sum()
@@ -37,9 +40,21 @@ def clean(path='Life Expectancy Data.csv'):
 
     # print(df.describe())
 
+    # return feature(df)
+    return df
+
+
+def feature(df):
+
+    df['gdp_per_expense'] = df['percentage expenditure'] / df['GDP']
+
+    df['diff_deaths'] = df['under-five deaths'] - df['infant deaths']
+
+    df.info()
+
     return df
 
 
 if __name__ == "__main__":
     df = clean()
-    print(len(df))
+    df = feature(df)

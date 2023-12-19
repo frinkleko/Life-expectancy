@@ -6,9 +6,11 @@ from predict import lgbm
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import VarianceThreshold, SelectFromModel, RFECV
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Program Files/Graphviz/bin'
 
 
-def Var_filter(df, threshold=0.001):
+def Var_filter(df, threshold=0.01):
     # 使用方差过滤特征
 
     y = df.iloc[:, 3].tolist()
@@ -62,7 +64,7 @@ def RFE_(df):
     )
 
     # 初始化RFE
-    rfe = RFECV(estimator=lgb_model, min_features_to_select=10, cv=10, scoring='neg_mean_squared_error')
+    rfe = RFECV(estimator=lgb_model, min_features_to_select=15, cv=10, scoring='neg_mean_squared_error')
 
     # 训练RFE并选择特征
     rfe.fit(X, y)
@@ -122,8 +124,11 @@ def importance(df):
 
 if __name__ == "__main__":
     df = clean()
-    feature = RFE_(df)  # didn't work, no promotion
-    print(len(feature))
-    feature.append('Life expectancy')
-    df = df[feature]
+    # feature = RFE_(df)  # didn't work, no promotion
+    # print(len(feature))
+    # feature.append('Life expectancy')
+    # df = df.drop(['Status', 'infant deaths', 'Hepatitis B', 'Polio'], axis=1)
     lgbm(df)
+
+
+# ['Status', 'infant deaths', 'Hepatitis B', 'Polio'] 2.755

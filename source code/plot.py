@@ -38,18 +38,33 @@ def corr(df):
     plt.show()
 
 
-def demonstrate(df, feature):
-    # 特定feature与Life expectancy的关系
-    sns.histplot(df[feature], bins=20)  # 假设feature是你要查看的特征
-    plt.show()
+def demonstrate(data, feature, target='Life expectancy'):
+    """
+    Explore the distribution of a feature and its relationship with the target.
 
-    sns.kdeplot(df[feature])
-    plt.show()
+    Parameters:
+    - feature: str, the name of the feature column
+    - target: str, the name of the target column
+    - data: DataFrame, the input data containing the feature and target
 
-    sns.boxplot(x=feature, data=df)
-    plt.show()
+    Returns:
+    None (displays plots)
+    """
+    # 设置图形的布局
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))
 
-    sns.scatterplot(x=feature, y='Life expectancy', data=df)
+    # 绘制特征的分布图
+    sns.histplot(data=data, x=feature, kde=True, ax=axes[0], color='blue', bins=30)
+    axes[0].set_title(f'Distribution of {feature}')
+
+    # 绘制特征与目标值的关系图
+    sns.scatterplot(data=data, x=feature, y=target, color='green', ax=axes[1])
+    axes[1].set_title(f'{feature} vs {target}')
+
+    # 调整子图之间的间距
+    plt.tight_layout()
+
+    # 显示图形
     plt.show()
 
 
@@ -87,6 +102,8 @@ def world_map(df):
 
 
 def feature_visualization(model, X_test):
+    plt.figure(figsize=(10, 6))
+
     explainer = shap.TreeExplainer(model)
 
     shap_values = explainer(X_test)
@@ -107,7 +124,7 @@ def feature_visualization(model, X_test):
     # Beeswarm plot
     shap.plots.beeswarm(shap_values)
 
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 8))
+    # fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 8))
 
     # SHAP scatter plots
     # 结合具体feature
@@ -117,8 +134,13 @@ def feature_visualization(model, X_test):
 
 if __name__ == "__main__":
     df = clean()
-    model, _, X_test = lgbm(df)
-    feature_visualization(model, X_test)
-    # kde(df)
+    demonstrate(df, 'HIV/AIDS')
+    demonstrate(df, 'Adult Mortality')
+    demonstrate(df, 'Income composition of resources')
+
     # corr(df)
+    # model, _, X_test = lgbm(df)
+    # feature_visualization(model, X_test)
+    # a = ['infant deaths', 'Hepatitis B', 'Polio']
+    # kde(df)
     # world_map(df)

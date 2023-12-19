@@ -1,6 +1,7 @@
 import numpy as np
 from preprocess import clean
 import matplotlib.pyplot as plt
+import lightgbm as lgb
 from lightgbm import LGBMRegressor, LGBMClassifier
 from lightgbm import plot_importance
 from sklearn.svm import NuSVR
@@ -327,6 +328,9 @@ def lgbm(df):
     # 显示重要特征
     plot_importance(model)
     plt.show()
+    plt.figure(figsize=(20, 10))
+    lgb.plot_tree(model, tree_index=0, figsize=(20, 10), show_info=['split_gain'])
+    plt.show()
 
     # 绘制散点图
     plt.scatter(y_test, y_pred, color='blue', label=f'MSE: {mse:.2f}', s=10)
@@ -349,7 +353,7 @@ def lgbm(df):
 
 
 def Adversarial_Validation(df, ratio=0.2):  # lgbm version
-
+    # 对抗验证
     num_zeros = int(ratio * len(df))
     num_ones = len(df) - num_zeros
     # 生成包含 20% 0 和 80% 1 的数组
@@ -423,4 +427,4 @@ if __name__ == "__main__":
     # KNN(df)
     # SVM(df)
     # lgbm(clean())  # mse:2.81
-    Adversarial_Validation(df)
+    # Adversarial_Validation(df)
