@@ -79,21 +79,80 @@
    - Key Findings in Model Interpretability
 
 ---
+![](importance.png)
+
+---
 ![](shap1.png)
 
 ---
 ![](shap2.png)
 
-## 5. Feature Engineering
-   - Importance of Feature Engineering (Including the Introduction of 100 Redundant Features)
-   - Model's Capability in Feature Selection
-   - Performance Enhancement through Feature Engineering
+## 5. Feature Engineering from redundant features
+
+In this section, we delve into the significance of feature engineering, with a focus on introducing and exploring the impact of adding redundant features.
+
+### Introduction to Redundant Features
+
+To assess the model's capability in feature selection and enhance its performance, we introduced the redundant features. These features include 30 generated using random noise (`np.random.randn`) and 20 synthesized by randomly selecting two important features and performing a weighted linear combination.
+
+```python
+import pandas as pd
+import numpy as np
+
+
+def add_redundant_features(df, features):
+    # Generate redundant features
+    num_redundant_features = 30
+    redundant_features = np.random.randn(len(df), num_redundant_features)
+
+    result_df = pd.concat(
+        [df, pd.DataFrame(redundant_features, columns=[f"Redundant_{i}" for i in range(num_redundant_features)])],
+        axis=1)
+
+    num_Linear_features = 20
+
+    for i in range(num_Linear_features):
+        # Randomly select two feature indices
+        selected_features = np.random.choice(features, size=2, replace=False)
+
+        # Randomly generate weights for linear combination
+        weights = np.random.rand(2)
+        weights /= weights.sum()  # Normalize to ensure weights sum to 1
+
+        # Perform linear combination
+        linear_combination = result_df[selected_features].dot(weights)
+
+        # Add the redundant feature to the DataFrame
+        result_df[f'Linear{i}'] = linear_combination
+        
+    return result_df
+```
+redundant_features i ~ N(0, 1)
+
+linear_combination i = w1 * feature1i + w2 * feature2i
+
+
+## Model's Capability in Feature Selection
+
+We applied the Recursive Feature Elimination (RFE) algorithm using `RFECV` from `sklearn.feature_selection` to assess the model's ability to select relevant features. 
+It performs feature ranking by eliminating recursive features and cross-validating the best feature number selection.
+The LGBM model was trained and evaluated after feature selection.Use 5-fold cross-validation and 'neg_mean_squared_error' as estimation method.
+After the `RFECV` search was completed, we obtained the feature combination with the optimal regression effect.
 
 ---
-![](importance.png)
+![rank](rank.png)
+
+## Performance Enhancement through Feature Engineering
+
+After feature selection, the model's performance was analyzed using the importance and contribution of each feature. The model's learned importance provided insights into distinguishing features that are significantly more important than redundant ones. We visualized the proportion of non-redundant features from the top features using a heatmap.
+
+Through these steps, we identified crucial features that positively contributed to the model's predictive power and discovered features with lower importance that might introduce noise. Subsequently, we pruned features with lower importance, resulting in an improved model performance, as indicated by a reduction in MSE loss.
 
 ---
-![](noise.png)
+![noise](noise.png)
+
+---
+![compare](compare.png)
 
 ## 6. Conclusion
    - Summary of the Project
